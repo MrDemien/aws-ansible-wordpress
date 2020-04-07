@@ -1,0 +1,24 @@
+---
+- hosts: wordpress # from the 'hosts' definition in hosts.yml
+
+  tasks:
+  # deploys all new content except for user uploaded media
+  - name: 'Deploy new content'
+    synchronize:
+      src: ./
+      dest: /home/ubuntu/current/ # change this to your remote hosts's IP address
+      recursive: yes
+      delete: yes
+      rsync_opts: # exclude sensitive or too-big directories
+        - '--exclude=wp-content/uploads'
+        - '--exclude=.env'
+    become: yes
+
+  - name: 'Change owner'
+    file:
+      path: /home/ubuntu/current
+      state: directory
+      owner: ubuntu # change the recently deployed files to your server/group of choice
+      group: ubuntu
+      recurse: yes
+    become: yes
